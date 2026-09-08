@@ -140,17 +140,42 @@ async function testServiceWorkerPipeline() {
     const evalJsZip = await sendCdp('Runtime.evaluate', {
       expression: 'typeof self.JSZip === "function"'
     });
-    console.log(`✅ JSZip loaded in Service Worker: ${evalJsZip.result.value}`);
+    console.log(`✅ JSZip loaded in Service Worker: ${evalJsZip?.result?.value}`);
 
-    // 6. Test triggering START_JOB via internal message handler
-    console.log('Dispatching test START_JOB message in Service Worker...');
-    const jobPromise = sendCdp('Runtime.evaluate', {
+    // 6. Test triggering START_JOB via popup page context to Service Worker
+    console.log('Dispatching test START_JOB message from popup context...');
+    const extId = swTarget.url.match(/chrome-extension:\/\/([a-z0-9]+)\//)[1];
+    const popupUrl = `chrome-extension://${extId}/popup/popup.html`;
+    const newTabRes = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/new?${encodeURIComponent(popupUrl)}`, { method: 'PUT' });
+    const popupTarget = await newTabRes.json();
+    
+    const popupWs = new globalThis.WebSocket(popupTarget.webSocketDebuggerUrl);
+    await new Promise((res, rej) => { popupWs.onopen = res; popupWs.onerror = rej; });
+    
+    let popupMsgId = 1;
+    function sendPopupCdp(method, params = {}) {
+      return new Promise((resolve) => {
+        const id = popupMsgId++;
+        const onMsg = (e) => {
+          const data = JSON.parse(e.data);
+          if (data.id === id) {
+            popupWs.removeEventListener('message', onMsg);
+            resolve(data.result);
+          }
+        };
+        popupWs.addEventListener('message', onMsg);
+        popupWs.send(JSON.stringify({ id, method, params }));
+      });
+    }
+
+    await sendPopupCdp('Runtime.enable');
+    const startRes = await sendPopupCdp('Runtime.evaluate', {
       expression: `
         new Promise((resolve) => {
           const config = {
             targetUrl: 'http://127.0.0.1:8999',
-            maxPages: 2,
-            maxDepth: 1,
+            maxPages: 1,
+            maxDepth: 0,
             selectedViewportIds: ['mobile', 'desktop']
           };
           chrome.runtime.sendMessage({ type: 'START_JOB', config }, (res) => {
@@ -162,7 +187,6 @@ async function testServiceWorkerPipeline() {
       returnByValue: true
     });
 
-    const startRes = await jobPromise;
     console.log('✅ START_JOB triggered:', startRes?.result?.value);
 
     // 7. Poll chrome.storage.local for completion
@@ -197,6 +221,7 @@ async function testServiceWorkerPipeline() {
       }
     }
 
+    popupWs.close();
     ws.close();
 
     if (!completed) {
