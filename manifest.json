@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Website Screenshots Generator v2.4",
+  "version": "2.4.0",
+  "description": "Automatically crawl website pages, capture full-height responsive screenshots across 5 device viewports with zero white-space gaps, and download as ZIP.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting",
+    "downloads",
+    "storage",
+    "debugger"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

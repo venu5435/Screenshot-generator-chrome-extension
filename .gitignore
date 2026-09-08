@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Test output screenshots
+test/*.png
+tests/*.png
+
+# OS & Temp
+.DS_Store
+Thumbs.db
+*.log

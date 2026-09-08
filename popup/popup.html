@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Screenshots Generator</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Screenshots Generator <span class="v2-highlight">v2.4</span></h1>
+          <span class="version-tag">v2.4.0 • MV3</span>
+        </div>
+      </div>
+      <div id="statusBadge" class="status-badge idle">
+        <span class="status-dot"></span>
+        <span id="statusBadgeText">Ready</span>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- Input & Setup Panel -->
+      <section id="setupPanel" class="panel setup-panel">
+        <!-- Target URL Input -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="targetUrl">Target Website URL</label>
+            <button type="button" id="btnUseCurrentTab" class="text-btn" title="Use current active tab URL">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              Use Current Tab
+            </button>
+          </div>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <input type="url" id="targetUrl" placeholder="https://example.com" required autocomplete="off" spellcheck="false" />
+          </div>
+          <p id="urlErrorHint" class="error-hint hidden">Please enter a valid HTTP or HTTPS URL.</p>
+        </div>
+
+        <!-- Crawl Settings Grid -->
+        <div class="settings-grid">
+          <div class="form-group">
+            <label for="maxPages">
+              Max Pages
+              <span class="info-tooltip" title="Maximum internal pages to discover and capture (1-20)">ⓘ</span>
+            </label>
+            <div class="stepper-input">
+              <input type="number" id="maxPages" min="1" max="20" value="5" />
+              <span class="unit-label">pages</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="crawlDepth">
+              Crawl Depth
+              <span class="info-tooltip" title="0 = Seed page only, 1 = Seed + direct internal links, 2 = Nested links">ⓘ</span>
+            </label>
+            <div class="stepper-input">
+              <input type="number" id="crawlDepth" min="0" max="3" value="1" />
+              <span class="unit-label">levels</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viewport Selection -->
+        <div class="viewport-section">
+          <div class="label-row">
+            <label>Device Viewports (Full Height)</label>
+            <div class="viewport-actions">
+              <button type="button" id="btnSelectAllVp" class="text-btn">All</button>
+              <span class="sep">•</span>
+              <button type="button" id="btnDeselectAllVp" class="text-btn">None</button>
+            </div>
+          </div>
+
+          <div class="viewport-grid">
+            <!-- Desktop -->
+            <label class="vp-card" for="vp_desktop">
+              <input type="checkbox" id="vp_desktop" value="desktop" checked />
+              <div class="vp-info">
+                <span class="vp-name">Large Desktop</span>
+                <span class="vp-dim">1920 × 1080</span>
+              </div>
+              <span class="vp-tag">Full</span>
+            </label>
+
+            <!-- Laptop -->
+            <label class="vp-card" for="vp_laptop">
+              <input type="checkbox" id="vp_laptop" value="laptop" checked />
+              <div class="vp-info">
+                <span class="vp-name">Laptop</span>
+                <span class="vp-dim">1366 × 768</span>
+              </div>
+              <span class="vp-tag">Full</span>
+            </label>
+
+            <!-- Medium -->
+            <label class="vp-card" for="vp_medium">
+              <input type="checkbox" id="vp_medium" value="medium" checked />
+              <div class="vp-info">
+                <span class="vp-name">Desktop/Laptop</span>
+                <span class="vp-dim">1280 × 720</span>
+              </div>
+              <span class="vp-tag">Full</span>
+            </label>
+
+            <!-- Tablet -->
+            <label class="vp-card" for="vp_tablet">
+              <input type="checkbox" id="vp_tablet" value="tablet" checked />
+              <div class="vp-info">
+                <span class="vp-name">Tablet</span>
+                <span class="vp-dim">768 × 1024</span>
+              </div>
+              <span class="vp-tag touch">Touch</span>
+            </label>
+
+            <!-- Mobile -->
+            <label class="vp-card" for="vp_mobile">
+              <input type="checkbox" id="vp_mobile" value="mobile" checked />
+              <div class="vp-info">
+                <span class="vp-name">Mobile</span>
+                <span class="vp-dim">390 × 844</span>
+              </div>
+              <span class="vp-tag touch">Touch</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <div class="actions-wrapper">
+          <button type="button" id="btnStartCapture" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Start Full-Page Capture</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Active Progress & Status Monitor Panel -->
+      <section id="progressPanel" class="panel progress-panel hidden">
+        <!-- Progress Header & Bar -->
+        <div class="progress-box">
+          <div class="progress-info-row">
+            <span id="progressPhaseLabel" class="phase-title">Capturing Responsive Pages...</span>
+            <span id="progressPercentValue" class="percent-val">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-label">Pages</span>
+            <span id="statPages" class="stat-value">0 / 0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Current Viewport</span>
+            <span id="statViewport" class="stat-value">-</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Screenshots</span>
+            <span id="statScreenshots" class="stat-value">0 / 0</span>
+          </div>
+        </div>
+
+        <!-- Current Action Banner -->
+        <div class="current-action-banner">
+          <div class="spinner-pulse"></div>
+          <span id="currentActionText">Initializing DevTools engine...</span>
+        </div>
+
+        <!-- Console Log Box -->
+        <div class="log-container">
+          <div class="log-header">
+            <span>Execution Activity Log</span>
+            <span id="logCountBadge" class="log-badge">0 entries</span>
+          </div>
+          <div id="logList" class="log-list">
+            <!-- Dynamic log entries -->
+          </div>
+        </div>
+
+        <!-- Cancel Control -->
+        <div class="progress-actions">
+          <button type="button" id="btnCancelCapture" class="btn-cancel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+            Cancel Job
+          </button>
+        </div>
+      </section>
+
+      <!-- Completion Banner Panel -->
+      <section id="completionPanel" class="panel completion-panel hidden">
+        <div class="completion-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <h2>Capture Complete!</h2>
+        <p id="completionMessage" class="completion-desc">All responsive screenshots were successfully bundled into ZIP.</p>
+        
+        <div class="zip-details-box">
+          <div class="zip-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <div class="zip-meta">
+            <span class="zip-label">ZIP Downloaded</span>
+            <span id="zipFilenameText" class="zip-filename">website-screenshots.zip</span>
+          </div>
+        </div>
+
+        <button type="button" id="btnStartNewJob" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Capture Another Website
+        </button>
+      </section>
+
+      <!-- Error Banner Panel -->
+      <section id="errorPanel" class="panel error-panel hidden">
+        <div class="error-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h2>Capture Failed</h2>
+        <p id="errorMessageText" class="error-desc">An unexpected error occurred.</p>
+        <button type="button" id="btnDismissError" class="btn-secondary">Dismiss & Try Again</button>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span>Device Emulation: Chrome DevTools Protocol</span>
+      <span class="dot">•</span>
+      <span>JSZip Compressed</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
